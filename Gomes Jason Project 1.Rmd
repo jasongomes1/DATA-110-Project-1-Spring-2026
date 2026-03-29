@@ -1,0 +1,83 @@
+---
+title: "Project 1"
+author: "Jason Gomes"
+date: "2026-03-24"
+output:
+  html_document: default
+  latex_engine: xelatex
+  pdf_document: default
+---
+
+This project analyzes county-level data from the United States to explore how economic factors affect median household income. The dataset contains quantitative variables, including poverty rate, unemployment rate, and median household income, as well as the categorical variable metro status, which indicates whether a county is classified as metro or non-metro. The goal of this project is to examine the relationship between poverty and unemployment on median household income using regression analysis and to visualize patterns in the data, particularly the difference between metro and non-metro counties. 
+ 
+
+Data Loading and Cleaning
+```{r}
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+
+# Loading dataset 
+county <- readr::read_csv("county.csv")
+str(county)
+
+```
+Data Cleaning
+```{r}
+county_clean <- county %>%
+  select(name, median_hh_income, poverty, unemployment_rate, metro) %>%
+  drop_na()
+head(county_clean)
+```
+
+
+
+Regression Analysis
+
+```{r}
+model <- lm(median_hh_income ~ poverty + unemployment_rate, data = county)
+summary(model)
+
+```
+Here we look at how median household income changes with poverty and unemployment. The results show that counties with higher poverty have lower income, while unemployment does not affect income much. About 56% of the differences in income can be explained by these two factors. The regression equation is:
+median_hh_income = 73916 - 1517 * poverty + 14.8 * unemployment_rate
+This shows that poverty is the main factor affecting income in these counties.
+
+Data Visualization for Regression Analysis
+```{r}
+ggplot(county, aes(x = poverty, y = median_hh_income, color = unemployment_rate)) +
+  geom_point(size = 2) +  # each county as a point
+  geom_smooth(method = "lm", se = FALSE, color = "black") +  # regression line for poverty
+  labs(
+    title = "Effect of Poverty and Unemployment on Median Household Income",
+    x = "Poverty Rate (%)",
+    y = "Median Household Income ($)",
+    caption = "Source: county.csv dataset",
+    color = "Unemployment Rate (%)"
+  ) +
+  scale_color_gradient(low = "blue", high = "red") +  # low unemployment = blue, high = red
+  theme_minimal()
+```
+
+Data Visualization: This visualization shows whether metro counties have higher median household income than non-metro counties. Each point represents a county, colored by metro status, so we can compare income differences between metro and non-metro areas.
+
+```{r}
+ggplot(county, aes(x = poverty, y = median_hh_income, color = metro)) +
+  geom_point(size = 2) + 
+  labs(
+    title = "Relationship Between Poverty and Median Household Income",
+    x = "Poverty Rate (%)",
+    y = "Median Household Income ($)",
+    caption = "Source: county.csv dataset",
+    color = "Metro Status"
+  ) +
+  scale_color_manual(values = c("red", "blue")) +  # categorical colors
+  theme_classic()
+```
+This scatterplot shows the negative relationship between poverty and income. Points are colored by metro status, showing that metro counties (blue) generally have higher income than non-metro counties (red). The plot includes a title, labeled axes, and a caption for the data source.
+
+
+Final Essay
+I cleaned the data by keeping only the columns I needed and removing any rows with missing values. The scatterplot shows how poverty affects income and also shows that metro counties usually have higher income than non-metro counties. I could not label every county on the plot because it would be too messy. This project shows that cleaning the data, doing regression, and making a plot helps us understand the differences in income between counties.
+
+
